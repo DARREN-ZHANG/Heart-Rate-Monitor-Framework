@@ -69,9 +69,16 @@ public class GraphActivity extends AppCompatActivity {
             public void onSensorChanged(SensorEvent event) {
                 float value = event.values[0];
                 mBuffer.append(value);
-                mBuffer.append("\n");
+                mBuffer.append("\t");
                 //writeCsvFile(mBuffer.toString());
                 mtv.setText(mBuffer.toString());
+
+                //always show new data in the bottom of textview
+                mtv.setMovementMethod(ScrollingMovementMethod.getInstance());
+                int offset = mtv.getLineCount() * mtv.getLineHeight();
+                if (offset > mtv.getHeight()) {
+                    mtv.scrollTo(0, offset - mtv.getHeight());
+                }
 
                 graphLastXValue += 1d;
                 mSeries.appendData(new DataPoint(graphLastXValue,value),true,40);
@@ -89,6 +96,15 @@ public class GraphActivity extends AppCompatActivity {
         super.onResume();
         msensorManager.registerListener(msensorEventListener,mlight,SensorManager.SENSOR_DELAY_NORMAL);
         mHandler.postDelayed(mTimer,1000);
+        /*mTimer = new Runnable() {
+            @Override
+            public void run() {
+                graphLastXValue += 1d;
+                mSeries.appendData(new DataPoint(graphLastXValue, getData()), true, 40);
+                mHandler.postDelayed(this, 200);
+            }
+        };
+        */
     }
 
     @Override
@@ -128,6 +144,7 @@ public class GraphActivity extends AppCompatActivity {
             br = new BufferedReader(new FileReader(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM+ "SensorData.csv")));
             while((sCurrentLine = br.readLine()) != null) {
                 content.append(sCurrentLine);
+                System.out.println("the Current Line value is :" + content);
             }
         }
         catch (IOException e){
