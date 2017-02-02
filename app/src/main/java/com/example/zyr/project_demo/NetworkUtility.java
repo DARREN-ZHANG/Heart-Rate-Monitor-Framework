@@ -120,23 +120,24 @@ public class NetworkUtility {
         }).start();
     }
 
-    public void sendLoginRequest(final String address, final String username, final String password, final HttpCallbackListener listener){
+    public void sendLoginRequest(final String username, final String password, final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
             public void run() {
                 HttpURLConnection connection = null;
                 JSONObject user= new JSONObject();
                 try {
-                    user.put("name", username);
-                    user.put("pass",password);
+                        user.put("name", username);
+                        user.put("pass",password);
                     //establish and set up a connection
 
-                    URL url = new URL(address);
+                    URL url = new URL("http://104.236.126.112/api/login");
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
                     connection.setReadTimeout(8000);
                     connection.setDoInput(true);
                     connection.setDoOutput(true);
+                    //connection.setRequestProperty("accept", "application/json");
                     connection.setRequestProperty("Content-Type", "application/json");
 
                     //The data to be posted
@@ -146,7 +147,9 @@ public class NetworkUtility {
                     out.close();
 
                     //get response stream from the server
+                    int status = connection.getResponseCode();
                     InputStream in = connection.getInputStream();
+                    //InputStream in = connection.getErrorStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                     StringBuilder response = new StringBuilder();
                     String line;
@@ -174,7 +177,7 @@ public class NetworkUtility {
         }).start();
     }
 
-    public void sendRegisterRequest(final String address, final String username, final String password,final HttpCallbackListener listener){
+    public void sendRegisterRequest(final String username, final String password,final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -183,10 +186,9 @@ public class NetworkUtility {
                 try {
                     user.put("name", username);
                     user.put("pass",password);
-                    //String str = "{'user':{'name':"+ username + "," + "pass:" + password + "}}";
                     //establish and set up a connection
 
-                    URL url = new URL(address);
+                    URL url = new URL("http://104.236.126.112/api/register");
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
                     connection.setReadTimeout(8000);
@@ -230,12 +232,12 @@ public class NetworkUtility {
     }
 
     public void parseJsonwithGson(String jsonData){
+        /*
         Gson gson = new Gson();
-        List<UserInfo> userInfoList = gson.fromJson(jsonData, new TypeToken<List<UserInfo>>(){}.getType());
+        List<UserData> userInfoList = gson.fromJson(jsonData, new TypeToken<List<UserData>>(){}.getType());
 
-       /* for (UserInfo userInfo :userInfoList)
+       for (UserData userInfo :userInfoList)
         {
-            System.out.println(userInfo.getId());
             System.out.println(userInfo.getValue());
             System.out.println(userInfo.getTime());
         }*/

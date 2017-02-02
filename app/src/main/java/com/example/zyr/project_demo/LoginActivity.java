@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,16 +51,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
-    private static final int SHOW_RESPONSE = 0;
 
-    private UserLogin mUser;
-
-    private NetworkUtility mNetwork;
-    private static final String loginAPI = "http://104.236.126.112/api/login";
-    private static final String registerAPI = "http://104.236.126.112/api/register";
-    private static final String loginSuccess =  "Log in Successful";
     private static final String registerSuccess = "Register Successful";
-    private static final String userNameTaken = "Username already taken";
+    private static final String nameTaken = "Username already taken";
+    private static final String wrongPass = "Sorry! invalid credentials.";
+    private NetworkUtility mNetwork;
 
     // UI references.
     private AutoCompleteTextView mUserIDView;
@@ -68,16 +64,33 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mLoginFormView;
     private TextInputLayout userIDWarpper;
     private TextInputLayout passwordWapper;
-    private Button mtestButton;
     private Button mregistButton;
 
-    private Handler handler = new Handler(){
+    private Handler loginHandler = new Handler(){
         public void handleMessage(Message msg){
-            switch (msg.what){
-                case SHOW_RESPONSE:
-                    String response = (String) msg.obj;
-                    //responseText = (TextView)findViewById(R.id.tv_2);
-                    //responseText.setText(response);
+           if(msg.obj.equals(wrongPass)){
+                Toast.makeText(getApplicationContext(),"Invalid credentials, Please try again!",Toast.LENGTH_SHORT).show();
+            }
+           else {
+               System.out.println("Response is : " + msg.obj.toString());
+                Toast.makeText(getApplicationContext(),"Login Success", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.putExtra("URL_user",msg.obj.toString());
+                startActivity(intent);
+            }
+        }
+    };
+
+    private Handler registerHandler = new Handler(){
+        public void handleMessage(Message msg){
+            if (msg.obj.equals(registerSuccess)){
+                Toast.makeText(getApplicationContext(), "Register Success, Please Login!", Toast.LENGTH_SHORT).show();
+            }
+            else if (msg.obj.equals(nameTaken)){
+                Toast.makeText(getApplicationContext(), "Username is already taken, please try again", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                Toast.makeText(getApplicationContext(), "Register failed", Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -87,7 +100,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mNetwork = new NetworkUtility();
-        mUser = new UserLogin();
         // Set up the login form and initialize the layout widget.
         mUserIDView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -136,7 +148,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         /**
          * This part is used for test other activities' function before the loginActivity is fully functional
          */
-        mtestButton = (Button)findViewById(R.id.test_button);
+
+
+        /*mtestButton = (Button)findViewById(R.id.test_button);
         mtestButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,6 +158,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 startActivity(intent);
             }
         });
+        */
     }
 
     private void populateAutoComplete() {
@@ -196,7 +211,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-
         // Reset errors.
         mUserIDView.setError(null);
         mPasswordView.setError(null);
@@ -234,18 +248,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mNetwork.sendLoginRequest(loginAPI, userID, password, new HttpCallbackListener() {
+            mNetwork.sendLoginRequest(userID, password, new HttpCallbackListener() {
                 @Override
                 public void onFinish(String response,Message message) {
-                    handler.sendMessage(message);
-                    if (response.equals(loginSuccess)){
-                        Toast.makeText(getApplicationContext(),"Login Success!",Toast.LENGTH_SHORT).show();
-                        //Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        //startActivity(intent);
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(),"Login Failed, Please Try Again", Toast.LENGTH_SHORT).show();
-                        }
+                    loginHandler.sendMessage(message);
                 }
 
                 @Override
@@ -253,6 +259,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     e.printStackTrace();
                 }
             });
+
         }
     }
     private void attemptRegister(){
@@ -293,26 +300,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mNetwork.sendRegisterRequest(registerAPI, userID, password, new HttpCallbackListener() {
+
+            //showProgress(true);
+            mNetwork.sendRegisterRequest(userID, password, new HttpCallbackListener() {
                 @Override
                 public void onFinish(String response, Message message) {
-                    handler.sendMessage(message);
-                    if(message.obj.equals(registerSuccess)){
-                        Toast.makeText(getApplicationContext(),"Register success, please login", Toast.LENGTH_SHORT).show();
-                    }
-                    else if (message.obj.equals(userNameTaken)){
-                        Toast.makeText(getApplicationContext(),"Register failed, username already taken, please change it", Toast.LENGTH_SHORT).show();
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(),"Register failed",Toast.LENGTH_SHORT).show();
-                    }
+                    registerHandler.sendMessage(message);
+                    System.out.println("Response is : " + response);
                 }
                 @Override
                 public void onError(Exception e) {
                     e.printStackTrace();
                 }
             });
+
         }
     }
 

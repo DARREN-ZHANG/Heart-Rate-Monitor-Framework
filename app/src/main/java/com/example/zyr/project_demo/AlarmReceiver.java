@@ -11,7 +11,7 @@ import android.content.Intent;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent){
-        Intent i = new Intent(context, MyService.class);
+        Intent i = new Intent(context, PostService.class);
         context.startService(i);
     }
 }

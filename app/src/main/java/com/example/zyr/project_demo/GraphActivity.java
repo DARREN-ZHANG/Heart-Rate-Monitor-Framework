@@ -12,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
@@ -32,11 +34,13 @@ import java.util.Random;
 
 public class GraphActivity extends AppCompatActivity {
 
+    private static String startTime;
+    private static String stopTime;
+    
     private SensorManager msensorManager;
     private Sensor mlight;
     private SensorEventListener msensorEventListener;
     private StringBuffer mBuffer;
-
     private final Handler mHandler = new Handler();
 
     private TextView mtv;
@@ -49,6 +53,11 @@ public class GraphActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
+
+        Button muploadButton = (Button)findViewById(R.id.upload_button);
+        Button mqueryButton = (Button)findViewById(R.id.query_button);
+        EditText startTimeView = (EditText)findViewById(R.id.start_time);
+        EditText stopTimeView = (EditText)findViewById(R.id.stop_time);
 
         mBuffer = new StringBuffer();
         mgraph = (GraphView)findViewById(R.id.graph);
@@ -70,6 +79,7 @@ public class GraphActivity extends AppCompatActivity {
                 float value = event.values[0];
                 mBuffer.append(value);
                 mBuffer.append("\t");
+                mBuffer.append(" ");
                 //writeCsvFile(mBuffer.toString());
                 mtv.setText(mBuffer.toString());
 
