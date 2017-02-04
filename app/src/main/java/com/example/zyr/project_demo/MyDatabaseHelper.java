@@ -16,7 +16,7 @@ import java.util.Locale;
 
 public class MyDatabaseHelper extends SQLiteOpenHelper {
     private Context mContext;
-    private static final String CREATE_TABLE = "create table if not exists "+ "userData" + " ("
+    private static final String CREATE_TABLE = "create table userData ("
             + "id integer primary key autoincrement, "
             + "time text, "
             + "value real)";
@@ -37,16 +37,6 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             default:
         }
     }
-
-    /*
-    public void createUserTable(SQLiteDatabase db){
-        String CREATE_VALUETABLE = "create table if not exists"+ userName + " ("
-                + "id integer primary key autoincrement, "
-                + "time text, "
-                + "value real)";
-        db.execSQL(CREATE_VALUETABLE);
-    }
-    */
 
 
     public void deletefromTable(String tableName, MyDatabaseHelper dbHelper){

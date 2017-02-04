@@ -72,7 +72,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Toast.makeText(getApplicationContext(),"Invalid credentials, Please try again!",Toast.LENGTH_SHORT).show();
             }
            else {
-               System.out.println("Response is : " + msg.obj.toString());
                 Toast.makeText(getApplicationContext(),"Login Success", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.putExtra("URL_user",msg.obj.toString());
@@ -112,6 +111,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         userIDWarpper.setHint("UserID");
         passwordWapper.setHint("Password");
 
+        Button mDBTestButton = (Button)findViewById(R.id.DBtest);
+
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -139,6 +140,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View v) {
                 //To Register
                 attemptRegister();
+            }
+        });
+
+        mDBTestButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent dbIntent = new Intent(LoginActivity.this, ShowDBDataActivity.class);
+                startActivity(dbIntent);
             }
         });
 
@@ -306,7 +315,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 @Override
                 public void onFinish(String response, Message message) {
                     registerHandler.sendMessage(message);
-                    System.out.println("Response is : " + response);
                 }
                 @Override
                 public void onError(Exception e) {

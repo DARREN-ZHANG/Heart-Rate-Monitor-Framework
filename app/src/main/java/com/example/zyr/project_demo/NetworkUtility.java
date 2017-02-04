@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
+
 
 /**
  * This class is used to realize http get/post request, Json file parsing and anything related to network process
@@ -92,12 +92,16 @@ public class NetworkUtility {
 
                     //get response stream from the server
                     InputStream in = connection.getInputStream();
+                    //InputStream err = connection.getErrorStream();
+                    int status = connection.getResponseCode();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
                     StringBuilder response = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) {
                         response.append(line);
                     }
+                    System.out.println("The status is :" + status);
+                    System.out.println("The response is :" + response);
                     Message message = new Message();
                     message.what = 0;
                     message.obj = response.toString();
@@ -147,7 +151,7 @@ public class NetworkUtility {
                     out.close();
 
                     //get response stream from the server
-                    int status = connection.getResponseCode();
+                    //int status = connection.getResponseCode();
                     InputStream in = connection.getInputStream();
                     //InputStream in = connection.getErrorStream();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
