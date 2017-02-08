@@ -1,6 +1,13 @@
 package com.example.zyr.project_demo;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Message;
+import android.provider.Settings;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -235,6 +242,59 @@ public class NetworkUtility {
         }).start();
     }
 
+    public void postWholeTable(final String address, final JSONArray jsonArray, final HttpCallbackListener listener){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection connection = null;
+                try {
+                    //establish and set up a connection
+                    URL url = new URL(address);
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
+                    connection.setReadTimeout(8000);
+                    connection.setDoInput(true);
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty("Content-Type", "application/json");
+
+                    //The data to be posted
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    out.writeBytes(jsonArray.toString());
+                    out.flush();
+                    out.close();
+
+                    //get response stream from the server
+                    InputStream in = connection.getInputStream();
+                    //InputStream err = connection.getErrorStream();
+                    int status = connection.getResponseCode();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    System.out.println("The status is :" + status);
+                    System.out.println("The response is :" + response);
+                    Message message = new Message();
+                    message.what = 0;
+                    message.obj = response.toString();
+
+                    if (listener != null) {
+                        listener.onFinish(response.toString(),message);
+                    }
+                } catch (Exception e) {
+                    if (listener != null) {
+                        listener.onError(e);
+                    }
+                } finally {
+                    if (connection != null) {
+                        connection.disconnect();
+                    }
+                }
+            }
+        }).start();
+    }
+
     public void parseJsonwithGson(String jsonData){
         /*
         Gson gson = new Gson();
@@ -263,7 +323,6 @@ public class NetworkUtility {
             e.printStackTrace();
         }
     }
-
 
 
 }

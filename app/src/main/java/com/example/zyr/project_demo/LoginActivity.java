@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
            else {
                 Toast.makeText(getApplicationContext(),"Login Success", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("URL_user",msg.obj.toString());
+                intent.putExtra("UserName",msg.obj.toString());
                 startActivity(intent);
             }
         }
@@ -111,8 +111,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         userIDWarpper.setHint("UserID");
         passwordWapper.setHint("Password");
 
-        Button mDBTestButton = (Button)findViewById(R.id.DBtest);
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -140,14 +138,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View v) {
                 //To Register
                 attemptRegister();
-            }
-        });
-
-        mDBTestButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent dbIntent = new Intent(LoginActivity.this, ShowDBDataActivity.class);
-                startActivity(dbIntent);
             }
         });
 

@@ -20,12 +20,14 @@
             android:orientation="horizontal">
             <EditText
                 android:id="@+id/threshold_EditText"
-                android:layout_width="260dp"
+                android:layout_width="0dp"
+                android:layout_weight="5"
                 android:layout_height="50dp"
                 android:hint="@string/threshold_value"/>
             <Button
                 android:id="@+id/apply_button"
-                android:layout_width="70dp"
+                android:layout_width="0dp"
+                android:layout_weight="2"
                 android:layout_height="35dp"
                 android:text="@string/apply"/>
         </LinearLayout>
@@ -37,7 +39,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             />
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/data_button_zone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,8 +49,8 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/graph_button"
-                android:layout_marginLeft="125dp"/>
-        </LinearLayout>
+                android:layout_centerInParent="true"/>
+        </RelativeLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -63,7 +65,7 @@
             android:layout_height="120dp"
             android:hint="@string/response"
             />
-       <LinearLayout
+       <RelativeLayout
            android:id="@+id/network_button_zone"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
@@ -72,18 +74,8 @@
                android:id="@+id/get_button"
                android:layout_width="100dp"
                android:layout_height="wrap_content"
-               android:layout_marginLeft="30dp"
+               android:layout_centerInParent="true"
                android:text="@string/get_button"/>
-           <Button
-               android:id="@+id/post_button"
-               android:layout_width="100dp"
-               android:layout_height="wrap_content"
-               android:text="@string/post_button"/>
-           <Button
-               android:id="@+id/stop_button"
-               android:layout_width="100dp"
-               android:layout_height="wrap_content"
-               android:text="Stop"/>
-       </LinearLayout>
+       </RelativeLayout>
     </LinearLayout>
 </RelativeLayout>

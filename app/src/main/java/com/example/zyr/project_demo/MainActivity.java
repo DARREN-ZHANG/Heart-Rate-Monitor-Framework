@@ -3,11 +3,9 @@ package com.example.zyr.project_demo;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,15 +21,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
 public class MainActivity extends AppCompatActivity {
     //Network related vars
     private NetworkUtility mNetworkUtility;
-    private static final String url_yue = "http://104.236.126.112/api/user/yue";
-    private static final String url_yiran = "http://104.236.126.112/api/user/yiran";
+    private static String user_name;
     private static String url_user;
     private PostService mService;
     //Sensor related vars
@@ -40,9 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private Sensor mlight;
     private SensorEventListener msensorEventListener;
     private StringBuffer viewBuffer;
-    private float sensorValue;
     //other vars
-    private MyDatabaseHelper myDatabaseHelper;
     private static float threshold;
     //UI related vars
     private TextView showData;
@@ -63,39 +54,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        threshold = 500;
         mNetworkUtility = new NetworkUtility();
         mService =new PostService();
-        threshold = 500;
 
         Intent intent = getIntent();
-        url_user = intent.getStringExtra("URL_user");
-        saveData(url_user);
-
-        myDatabaseHelper = new MyDatabaseHelper(this, "yiran.db", null, 1);
-        SQLiteDatabase myDBInstance = myDatabaseHelper.getWritableDatabase();
-        /*
-        String databaseName = url_data + ".db";
-        myDatabaseHelper = new MyDatabaseHelper(this,databaseName,null,1);
-        SQLiteDatabase myDB= myDatabaseHelper.getWritableDatabase();
-        */
+        user_name = intent.getStringExtra("UserName");
+        saveData(user_name);
+        url_user = "http://104.236.126.112/api/user/" + user_name;
 
         //layout init
         Button mDrawButton;
         Button mGetButton;
-        Button mPostButton;
         Button mApplyButton;
-        Button mStopButton;
 
         mDrawButton = (Button) findViewById(R.id.draw_button);
         mGetButton = (Button) findViewById(R.id.get_button);
-        mPostButton = (Button) findViewById(R.id.post_button);
         mApplyButton = (Button) findViewById(R.id.apply_button);
-        mStopButton = (Button) findViewById(R.id.stop_button);
 
         showData = (TextView) findViewById(R.id.data_tv);
         thresholdText = (EditText) findViewById(R.id.threshold_EditText);
 
         viewBuffer = new StringBuffer();
+
         //sensor init
         msensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mlight = msensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -107,12 +89,10 @@ public class MainActivity extends AppCompatActivity {
                 float value = event.values[0];
 
                 viewBuffer.append("accurancy:" + acc);
-                viewBuffer.append("\n");
+                viewBuffer.append("   ");
                 viewBuffer.append("light level:" + value);
                 viewBuffer.append("\n");
                 showData.setText(viewBuffer.toString());
-
-                sensorValue = value;
 
                 //always show new data in the bottom of textview
                 showData.setMovementMethod(ScrollingMovementMethod.getInstance());
@@ -127,24 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-/*
-            if (threshold > sensorValue) {
-                System.out.println("threshold is : " + threshold);
 
-                //stop post service first,stop the alarm and the service
-                //save for post later
-            } else {
-                //post directly
-
-
-
-            Intent startIntent = new Intent(MainActivity.this, PostService.class);
-            startIntent.putExtra("URL_user_to_service",url_data);
-            startService(startIntent);
-            System.out.println("Post Start");
-
-            }*/
-
+        getPostService();
 
         //Button responses
         mDrawButton.setOnClickListener(new View.OnClickListener() {
@@ -157,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         mGetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mNetworkUtility.sendGetHttpRequest(url_yue, new HttpCallbackListener() {
+                mNetworkUtility.sendGetHttpRequest(url_user, new HttpCallbackListener() {
                     @Override
                     public void onFinish(String response, Message message) {
                         handler.sendMessage(message);
@@ -171,12 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        mPostButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getPostService();
-            }
-        });
 
         mApplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,22 +145,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Threshold is been set as " + tmp, Toast.LENGTH_SHORT).show();
             }
         });
-
-        mStopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopPostService();
-            }
-        });
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (threshold > sensorValue){
-
-                }
-            }
-        }).start();
 
     }
 
@@ -226,35 +168,21 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    //save URL in a SharedPreferences file
     private void saveData(String data) {
         SharedPreferences.Editor editor = getSharedPreferences("UserName", MODE_PRIVATE).edit();
         editor.putString("username", data);
         editor.commit();
     }
 
-    //read data from sharedpreference file
+    //read data from the SharedPreferences file
     private String readData() {
         SharedPreferences pref = getSharedPreferences("UserName", MODE_PRIVATE);
         String data = pref.getString("username", "");
         return data;
     }
 
-    private void insert(String TableName, SQLiteDatabase db, float value) {
-        db.beginTransaction();
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-            String currentTime = dateFormat.format(Calendar.getInstance().getTime());
-            ContentValues values = new ContentValues();
-            values.put("time", currentTime);
-            System.out.println("current time is :" + currentTime);
-            values.put("value", value);
-            db.insert(TableName, null, values);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            db.endTransaction();
-        }
-    }
+    //Stop the PostService manually
     private void stopPostService(){
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent i = new Intent(MainActivity.this, AlarmReceiver.class);
@@ -271,12 +199,6 @@ public class MainActivity extends AppCompatActivity {
         startIntent.putExtra("URL_user_to_service", url_data);
         System.out.println("url_user is : " + url_user);
         startService(startIntent);
-        Toast.makeText(getApplicationContext(), "Post Service Initiated", Toast.LENGTH_SHORT).show();
     }
-
-    public float getThreshold(){
-        return threshold;
-    }
-
 }
 

@@ -10,53 +10,101 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.zyr.project_demo.ShowDBDataActivity">
-    <EditText
-        android:id="@+id/start_time"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="90dp">
+        <EditText
+            android:id="@+id/start_time"
+            android:layout_width="190dp"
+            android:layout_height="45dp"
+            android:textSize="12sp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:hint="@string/start_time_hint"/>
+        <EditText
+            android:id="@+id/stop_time"
+            android:layout_width="190dp"
+            android:layout_height="45dp"
+            android:textSize="12sp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_below="@id/start_time"
+            android:hint="@string/stop_time_hint"/>
+
+        <Button
+            android:id="@+id/query_from_button"
+            android:layout_width="75dp"
+            android:layout_height="35dp"
+            android:textSize="12sp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/query_via_time_button"
+            android:layout_alignBottom="@+id/stop_time"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:hint="@string/start_time_hint"/>
-    <EditText
-        android:id="@+id/stop_time"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:hint="@string/stop_time_hint"/>
+        android:orientation="horizontal"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp">
+        <EditText
+            android:id="@+id/start_value"
+            android:layout_width="80dp"
+            android:layout_height="45dp"
+            android:textSize="12sp"
+            android:hint="@string/query_from_value_hint1"
+            />
+        <EditText
+            android:id="@+id/end_value"
+            android:layout_width="80dp"
+            android:layout_height="45dp"
+            android:textSize="12sp"
+            android:layout_toEndOf="@id/start_value"
+            android:layout_marginStart="5dp"
+            android:hint="@string/query_from_value_hint2"/>
+        <Button
+            android:id="@+id/query_via_value"
+            android:layout_width="75dp"
+            android:layout_height="35dp"
+            android:textSize="12sp"
+            android:layout_marginStart="68dp"
+            android:layout_toEndOf="@id/end_value"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/query_via_value_button"/>
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/show_database_data"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="240dp"
         android:scrollbars="vertical"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/query_from_button"
-            android:layout_width="85dp"
-            android:layout_height="wrap_content"
-            android:text="@string/query_button" />
+
         <Button
             android:id="@+id/query_all_button"
             android:layout_width="85dp"
             android:layout_height="wrap_content"
+            android:textSize="10sp"
             android:text="@string/query_all_button"
-            android:layout_marginStart="5dp"/>
+            android:layout_marginStart="90dp"/>
         <Button
-            android:id="@+id/query_from_server_button"
+            android:id="@+id/upload_button"
             android:layout_width="85dp"
             android:layout_height="wrap_content"
-            android:text="@string/query_server_button"
-            android:layout_marginStart="5dp"
-            />
-        <Button
-            android:id="@+id/insert_button"
-            android:layout_width="85dp"
-            android:layout_height="wrap_content"
-            android:text="@string/insert_button"
+            android:textSize="10sp"
+            android:text="@string/upload_button"
             android:layout_marginStart="5dp"
             />
     </LinearLayout>
-
 
 </LinearLayout>
