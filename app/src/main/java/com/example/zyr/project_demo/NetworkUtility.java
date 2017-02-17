@@ -70,7 +70,7 @@ public class NetworkUtility {
             }
         }).start();
     }
-
+    // The method is used to post abnormal data
     public void sendPostHttpRequest(final String address,final String time, final float value,final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
@@ -79,8 +79,8 @@ public class NetworkUtility {
                 JSONObject json= new JSONObject();
                 try {
                     json.put("time",time);
-                    json.put("value",value);
-                    json.put("value2",value);
+                    json.put("value", value);
+                    //json.put("value2"," ");
 
                     //establish and set up a connection
                     URL url = new URL(address);
@@ -131,6 +131,7 @@ public class NetworkUtility {
         }).start();
     }
 
+
     public void sendLoginRequest(final String username, final String password, final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
@@ -145,6 +146,7 @@ public class NetworkUtility {
                     URL url = new URL("http://104.236.126.112/api/login");
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
+                    connection.setConnectTimeout(5000);
                     connection.setReadTimeout(8000);
                     connection.setDoInput(true);
                     connection.setDoOutput(true);
@@ -202,6 +204,7 @@ public class NetworkUtility {
                     URL url = new URL("http://104.236.126.112/api/register");
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
+                    connection.setConnectTimeout(5000);
                     connection.setReadTimeout(8000);
                     connection.setDoInput(true);
                     connection.setDoOutput(true);
@@ -242,7 +245,7 @@ public class NetworkUtility {
         }).start();
     }
 
-    public void postWholeTable(final String address, final JSONArray jsonArray, final HttpCallbackListener listener){
+    public void postWholeTable(final String address, final JSONObject jsonObject, final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -252,14 +255,14 @@ public class NetworkUtility {
                     URL url = new URL(address);
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("POST");
-                    connection.setReadTimeout(8000);
+                    connection.setReadTimeout(60*1000);
                     connection.setDoInput(true);
                     connection.setDoOutput(true);
                     connection.setRequestProperty("Content-Type", "application/json");
 
                     //The data to be posted
                     DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-                    out.writeBytes(jsonArray.toString());
+                    out.writeBytes(jsonObject.toString());
                     out.flush();
                     out.close();
 
@@ -295,6 +298,68 @@ public class NetworkUtility {
         }).start();
     }
 
+    public void queryFromServer(final String address, final String startTime, final String endTime, final HttpCallbackListener listener){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection connection = null;
+                JSONObject json= new JSONObject();
+                JSONObject data = new JSONObject();
+                try {
+                    json.put("time1", startTime);
+                    json.put("time2", endTime);
+                    data.put("data", json);
+                    System.out.println("data is : " + data);
+                    //establish and set up a connection
+                    URL url = new URL(address);
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
+                    connection.setReadTimeout(10000);
+                    connection.setDoInput(true);
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty("Content-Type", "application/json");
+
+                    //The data to be posted
+                    DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+                    out.writeBytes(data.toString());
+                    out.flush();
+                    out.close();
+
+                    //get response stream from the server
+                    InputStream in = connection.getInputStream();
+                    //InputStream err = connection.getErrorStream();
+                    int status = connection.getResponseCode();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    System.out.println("The status is :" + status);
+                    System.out.println("The response is :" + response);
+                    Message message = new Message();
+                    message.what = 0;
+                    message.obj = response.toString();
+
+                    if (listener != null) {
+                        //callback onFinish(String response); method
+                        listener.onFinish(response.toString(),message);
+                    }
+                    //Thread.sleep(2000);
+                } catch (Exception e) {
+                    if (listener != null) {
+                        listener.onError(e);
+                    }
+                } finally {
+                    if (connection != null) {
+                        connection.disconnect();
+                    }
+                }
+            }
+        }).start();
+    }
+
+
     public void parseJsonwithGson(String jsonData){
         /*
         Gson gson = new Gson();
@@ -307,22 +372,7 @@ public class NetworkUtility {
         }*/
     }
 
-    public void parseJsonWithJSONObject(String jsonData){
-        try {
-            JSONArray jsonArray = new JSONArray(jsonData);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String Id = jsonObject.getString("id");
-                String value = jsonObject.getString("value");
-                String time = jsonObject.getString("time");
-                System.out.println("ID:" + Id);
-                System.out.println("value:" + value);
-                System.out.println("Time:" + time);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
 
 
 }

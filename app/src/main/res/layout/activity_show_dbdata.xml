@@ -75,36 +75,87 @@
             android:layout_alignParentEnd="true"
             android:text="@string/query_via_value_button"/>
     </RelativeLayout>
-
-    <TextView
-        android:id="@+id/show_database_data"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:scrollbars="vertical"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        />
+        android:layout_height="180dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp">
+        <LinearLayout
+            android:id="@+id/ll_progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/load_data" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/show_database_data"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scrollbars="vertical"
+            />
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/query_all_button"
+            android:id="@+id/query_from_server_button"
             android:layout_width="85dp"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
-            android:text="@string/query_all_button"
+            android:textSize="12sp"
+            android:text="@string/query_from_server_button"
             android:layout_marginStart="90dp"/>
         <Button
             android:id="@+id/upload_button"
             android:layout_width="85dp"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
+            android:textSize="12sp"
             android:text="@string/upload_button"
             android:layout_marginStart="5dp"
             />
     </LinearLayout>
-
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:orientation="horizontal"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp">
+        <EditText
+            android:id="@+id/hour_set_text"
+            android:layout_width="80dp"
+            android:layout_height="45dp"
+            android:textSize="12sp"
+            android:layout_marginStart="30dp"
+            android:hint="@string/hour_set"
+            />
+        <EditText
+            android:id="@+id/min_set_text"
+            android:layout_width="80dp"
+            android:layout_height="45dp"
+            android:textSize="12sp"
+            android:layout_toEndOf="@id/hour_set_text"
+            android:layout_marginStart="30dp"
+            android:hint="@string/min_set"/>
+        <Button
+            android:id="@+id/alarm_set_button"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:layout_marginStart="160dp"
+            android:layout_toEndOf="@id/hour_set_text"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:text="@string/set_clock_button"/>
+    </RelativeLayout>
 </LinearLayout>

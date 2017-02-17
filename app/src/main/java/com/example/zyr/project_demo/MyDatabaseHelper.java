@@ -17,7 +17,7 @@ import java.util.Locale;
 public class MyDatabaseHelper extends SQLiteOpenHelper {
     private Context mContext;
     private static final String CREATE_TABLE = "create table userData ("
-            + "id integer primary key autoincrement, "
+            + "_id integer primary key autoincrement, "
             + "time text, "
             + "value real)";
     //Constructor

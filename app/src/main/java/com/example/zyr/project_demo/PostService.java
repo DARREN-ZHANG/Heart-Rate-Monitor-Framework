@@ -39,15 +39,15 @@ public class PostService extends Service {
 
     private static float sensorValue;
     private static float thresholdInService;
-    private static String hourOfDay;
-    private static String minOfHour;
     private static int flag = 0;
     private static String url_user_temp;
-    private static String url_user;
+    private static String setHour;
+    private static String setMin;
     private NetworkUtility mNetworkUtility = new NetworkUtility();
     private SensorEventListener msensorEventListener;
     private SensorManager msensorManager;
     private Sensor mlight;
+
 
     @Override
     public IBinder onBind(Intent intent){
@@ -77,16 +77,68 @@ public class PostService extends Service {
         String DBName = readData + ".db";
         final MyDatabaseHelper myDB = new MyDatabaseHelper(this, DBName, null, 1);
         url_user_temp= "http://104.236.126.112/api/user/" + readData + "/temp";
-        url_user = "http://104.236.126.112/api/user/" + readData;
         //System.out.println("url_user in PostService is : " + url_user_temp);
 
         final int Hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         final int Minute = Calendar.getInstance().get(Calendar.MINUTE);
         final Handler handler = new Handler();
-        for (int i = 1; i <= 10000; i++){
+        /*
+        for(int i = 0; i < 18000; i++ ) {//Support Max 60Hz,Current Set is 5Hz
+            msensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+
+                    mlight = msensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+                    msensorEventListener = new SensorEventListener() {
+                        @Override
+                        public void onSensorChanged(SensorEvent event) {
+                            float value = event.values[0];
+                            sensorValue = value;
+                            System.out.println("Value is: " + value);
+                            System.out.println("sensorValue is: " + sensorValue);
+                            if (thresholdInService <= value) {
+                                flag = 1;
+                            } else {
+                                flag = 0;
+                            }
+                        }
+
+                        @Override
+                        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                        }
+                    };
+                    msensorManager.registerListener(msensorEventListener, mlight, SensorManager.SENSOR_DELAY_NORMAL);
+                    switch (flag) {
+                        case 1:
+                            postData(url_user_temp);
+                            insert("userData", myDB, sensorValue);
+                            //System.out.println("case 1 executed");
+                            break;
+                        case 0:
+                            insert("userData", myDB, sensorValue);
+                            //System.out.println("case 0 executed");
+                            break;
+                        default:
+                            break;
+                    }
+                    //stopSelf();
+                    if (Hour == getHour() && Minute == getMin()) {
+                        askUserToUpload();
+                    }
+
+                }
+            }, 200 * i);
+            msensorManager.unregisterListener(msensorEventListener, mlight);
+           // msensorEventListener = null;
+        }
+
+        //this is the solution for the highest sampling rate for any device, it varies from devices
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
                     //get sensor data
                     msensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
                     mlight = msensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
@@ -122,14 +174,22 @@ public class PostService extends Service {
                             break;
                     }
                     //stopSelf();
-                    if (Hour == 23 && Minute == 59) {
+                    if (Hour == getHour() && Minute == getMin()) {
                         askUserToUpload();
                     }
+                    msensorManager.unregisterListener(msensorEventListener, mlight);
+                    msensorEventListener = null;
                 }
-            }, 10000 * i);
-        }
-
+            }
+        }).start();
         //setAlarm();
+        */
+
+
+
+
+
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -148,6 +208,20 @@ public class PostService extends Service {
         return pref.getString("username","");
     }
 
+    public void setSetHour(String hour){
+        setHour = hour;
+    }
+    public void setSetMin(String min){
+        setMin = min;
+    }
+
+    private int getHour(){
+        return Integer.valueOf(setHour);
+    }
+    private int getMin(){
+        return Integer.valueOf(setMin);
+    }
+
     private void setAlarm(){
         //Using Alarm to make sure the service runs continuously
         AlarmManager manager = (AlarmManager)getSystemService(ALARM_SERVICE);
@@ -160,8 +234,9 @@ public class PostService extends Service {
 
     //method is used for immediately upload
     private void postData(String url){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.ENGLISH);
-        String currentTime = dateFormat.format(Calendar.getInstance().getTime());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS",Locale.ENGLISH);
+        String currentTime = dateFormat.format(Calendar.getInstance().getTime()) + "000";
+        //System.out.println("Current Time : " + currentTime);
         mNetworkUtility.sendPostHttpRequest(url, currentTime, sensorValue, new HttpCallbackListener() {
             @Override
             public void onFinish(String response, Message message) {
@@ -176,26 +251,18 @@ public class PostService extends Service {
 
     private void insert(String TableName, MyDatabaseHelper dbHelper, float value) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.US);
-        String currentTime = dateFormat.format(Calendar.getInstance().getTime());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS",Locale.US);
+        String currentTime = dateFormat.format(Calendar.getInstance().getTime()) + "000";
         ContentValues values = new ContentValues();
         values.put("time", currentTime);
         values.put("value", value);
         db.insert(TableName, null, values);
+        db.close();
     }
 
     public void setThresholdInService(float value){
         thresholdInService = value;
         System.out.println("thresholdInService is :" + thresholdInService);
-    }
-
-
-    public void setHourOfDay(String hour){
-        hourOfDay = hour;
-    }
-
-    public void setMinOfHour(String minute){
-        minOfHour = minute;
     }
 
     private void askUserToUpload(){

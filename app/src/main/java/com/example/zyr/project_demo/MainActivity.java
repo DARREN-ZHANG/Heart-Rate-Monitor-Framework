@@ -58,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
         threshold = 500;
         mNetworkUtility = new NetworkUtility();
         mService =new PostService();
+        //setup default value for the service
+        mService.setThresholdInService(threshold);
+        mService.setSetHour("23");
+        mService.setSetMin("00");
 
         Intent intent = getIntent();
         user_name = intent.getStringExtra("UserName");
@@ -66,12 +70,14 @@ public class MainActivity extends AppCompatActivity {
 
         //layout init
         Button mDrawButton;
-        Button mGetButton;
         Button mApplyButton;
+        Button mStartPollingButton;
+        Button mStopPollingButton;
 
         mDrawButton = (Button) findViewById(R.id.draw_button);
-        mGetButton = (Button) findViewById(R.id.get_button);
         mApplyButton = (Button) findViewById(R.id.apply_button);
+        mStartPollingButton = (Button) findViewById(R.id.start_polling_button);
+        mStopPollingButton = (Button) findViewById(R.id.stop_polling_button);
 
         showData = (TextView) findViewById(R.id.data_tv);
         thresholdText = (EditText) findViewById(R.id.threshold_EditText);
@@ -118,23 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(drawIntent);
             }
         });
-        mGetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mNetworkUtility.sendGetHttpRequest(url_user, new HttpCallbackListener() {
-                    @Override
-                    public void onFinish(String response, Message message) {
-                        handler.sendMessage(message);
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-
-            }
-        });
 
         mApplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,6 +132,20 @@ public class MainActivity extends AppCompatActivity {
                 threshold = Float.valueOf(tmp);
                 mService.setThresholdInService(threshold);
                 Toast.makeText(getApplicationContext(), "Threshold is been set as " + tmp, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mStartPollingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        mStopPollingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
 
