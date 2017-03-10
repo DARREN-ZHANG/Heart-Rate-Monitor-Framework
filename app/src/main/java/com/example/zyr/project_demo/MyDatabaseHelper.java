@@ -11,7 +11,8 @@ import java.util.Locale;
 
 
 /**
- * Created by ZYR on 2017/1/31.
+ * This Class is used for creating a Database
+ * if further requirements needs the Database to be updated, it would be implemented here
  */
 
 public class MyDatabaseHelper extends SQLiteOpenHelper {
@@ -36,16 +37,5 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             case 1:
             default:
         }
-    }
-
-
-    public void deletefromTable(String tableName, MyDatabaseHelper dbHelper){
-
-    }
-    public void updateTable(String tableName){
-
-    }
-    public void queryTable(String tableName){
-
     }
 }

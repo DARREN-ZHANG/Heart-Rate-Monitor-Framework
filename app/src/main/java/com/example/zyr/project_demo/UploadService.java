@@ -15,6 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class UploadService extends Service {
+    private PostService postService;
+    private static JSONObject jsonData;
     private NetworkUtility mNetwork;
     private String url_user;
     private String DBname;
@@ -24,6 +26,7 @@ public class UploadService extends Service {
     private Handler uploadFinishHandler = new Handler() {
         public void handleMessage(Message msg) {
             Toast.makeText(getApplicationContext(),"Upload Completed.",Toast.LENGTH_SHORT).show();
+            postService.clearJsonArray();
         }
     };
     @Override
@@ -40,6 +43,8 @@ public class UploadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, final int flags, int startId) {
+        postService = new PostService();
+        jsonData = postService.getJsonData();
         mNetwork = new NetworkUtility();
         String username = readData();
         url_user = "http://104.236.126.112/api/user/" + username;
@@ -62,6 +67,58 @@ public class UploadService extends Service {
         super.onDestroy();
     }
 
+    private void initiateUpload(final MyDatabaseHelper dbHelper){
+       //JSONObject mData = wrapDBDataToJson(dbHelper, startIndex, maxCount);
+
+        JSONObject mData = jsonData;
+        System.out.println("mData in Upload Service:" + mData);
+
+        mNetwork.postWholeTable(url_user, mData, new HttpCallbackListener() {
+            @Override
+            public void onFinish(String response, Message message) {
+                uploadFinishHandler.sendMessage(message);
+                //empty database after a post success by delete and recreate table userData
+                reCreateuserDataTable(dbHelper);
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        });
+    }
+    private void reCreateuserDataTable(MyDatabaseHelper dpHelper){
+        SQLiteDatabase db = dpHelper.getWritableDatabase();
+        db.delete("userData", null, null);
+        final String CREATE_TABLE = "create table userData ("
+                + "_id integer primary key autoincrement, "
+                + "time text, "
+                + "value real)";
+        db.execSQL(CREATE_TABLE);
+    }
+
+    private Long getCount(MyDatabaseHelper dpHelper){
+        SQLiteDatabase db = dpHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select count(*) from userData", null);
+        cursor.moveToNext();
+        Long count = cursor.getLong(0);
+        cursor.close();
+        return count;
+    }
+
+    private String readData(){
+        SharedPreferences pref = getSharedPreferences("UserName", MODE_PRIVATE);
+        return pref.getString("username","");
+    }
+
+    /**
+     * This method is used for wrap data in userData table into a JsonObject, every 1000 records are wrapped
+     * into a JsonObject,not used for now
+     * @param dbHelper
+     * @param startIndex
+     * @param maxCount
+     * @return
+     */
     private JSONObject wrapDBDataToJson(MyDatabaseHelper dbHelper, int startIndex, int maxCount){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         //get the total number of the records
@@ -101,45 +158,5 @@ public class UploadService extends Service {
         }
         //System.out.println(allData);
         return allData;
-    }
-
-    private void initiateUpload(final MyDatabaseHelper dbHelper){
-        JSONObject mData = wrapDBDataToJson(dbHelper, startIndex, maxCount);
-        mNetwork.postWholeTable(url_user, mData, new HttpCallbackListener() {
-            @Override
-            public void onFinish(String response, Message message) {
-                uploadFinishHandler.sendMessage(message);
-                //empty database after a post success by delete and recreate table userData
-                reCreateuserDataTable(dbHelper);
-            }
-
-            @Override
-            public void onError(Exception e) {
-
-            }
-        });
-    }
-    private void reCreateuserDataTable(MyDatabaseHelper dpHelper){
-        SQLiteDatabase db = dpHelper.getWritableDatabase();
-        db.delete("userData", null, null);
-        final String CREATE_TABLE = "create table userData ("
-                + "_id integer primary key autoincrement, "
-                + "time text, "
-                + "value real)";
-        db.execSQL(CREATE_TABLE);
-    }
-
-    private Long getCount(MyDatabaseHelper dpHelper){
-        SQLiteDatabase db = dpHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("select count(*) from userData", null);
-        cursor.moveToNext();
-        Long count = cursor.getLong(0);
-        cursor.close();
-        return count;
-    }
-
-    private String readData(){
-        SharedPreferences pref = getSharedPreferences("UserName", MODE_PRIVATE);
-        return pref.getString("username","");
     }
 }

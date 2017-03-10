@@ -59,10 +59,10 @@ public class GraphActivity extends AppCompatActivity {
         //layout init
         Button muploadButton = (Button)findViewById(R.id.upload_button);
         Button mqueryButton = (Button)findViewById(R.id.query_button);
-        mBuffer = new StringBuffer();
+        //mBuffer = new StringBuffer();
         GraphView mgraph = (GraphView)findViewById(R.id.graph);
-        mtv = (TextView)findViewById(R.id.show_sensor_data);
-        mtv.setMovementMethod(ScrollingMovementMethod.getInstance());
+        //mtv = (TextView)findViewById(R.id.show_sensor_data);
+        //mtv.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         mSeries = new LineGraphSeries<>();
         mgraph.addSeries(mSeries);
@@ -76,19 +76,21 @@ public class GraphActivity extends AppCompatActivity {
             @Override
             public void onSensorChanged(SensorEvent event) {
                 float value = event.values[0];
-                mBuffer.append(value);
-                mBuffer.append("  ");
-                //mBuffer.append(" ");
-                //writeCsvFile(mBuffer.toString());
-                mtv.setText(mBuffer.toString());
-
+                //mBuffer.append(value);
+                //mBuffer.append("  ");
                 sensorValue = value;
+                //writeCsvFile(mBuffer.toString());
+                //mtv.setText(mBuffer.toString());
+
+
                 //always show new data in the bottom of textview
+                /*
                 mtv.setMovementMethod(ScrollingMovementMethod.getInstance());
                 int offset = mtv.getLineCount() * mtv.getLineHeight();
                 if (offset > mtv.getHeight()) {
                     mtv.scrollTo(0, offset - mtv.getHeight());
                 }
+                */
 
                 graphLastXValue += 1d;
                 mSeries.appendData(new DataPoint(graphLastXValue,value),true,40);
@@ -147,21 +149,6 @@ public class GraphActivity extends AppCompatActivity {
         return  currentDate;
     }
 
-    private double getDateX() {
-
-        long totalMilliSeconds = System.currentTimeMillis();
-        long currentSecond = Long.parseLong((new SimpleDateFormat("s", Locale.US)).format(new Date(totalMilliSeconds)));
-        //System.out.println("Seconds: " + currentSecond);
-        long currentMinute = Long.parseLong((new SimpleDateFormat("m", Locale.US)).format(new Date(totalMilliSeconds)));
-        //System.out.println("Minutes: " + currentMinute);
-        long currentHour = Long.parseLong((new SimpleDateFormat("H", Locale.US)).format(new Date(totalMilliSeconds)));
-        //System.out.println("Hour:" + currentHour);
-        double myTime = currentSecond + currentMinute * 60 + currentHour * 60 * 60;
-        //System.out.println("Time: " + myTime);
-        return myTime;
-
-    }
-
     private void initGraph(GraphView graphView){
         graphView.getViewport().setXAxisBoundsManual(true);
         graphView.getViewport().setYAxisBoundsManual(true);
@@ -176,7 +163,9 @@ public class GraphActivity extends AppCompatActivity {
         graphView.getGridLabelRenderer().setTextSize(30);
         graphView.setTitle(getCurrentDate());
         graphView.getGridLabelRenderer().setVerticalAxisTitle("Sensor Value");
-    /*
+
+        //Code for set current time as X value
+        /*
         graphView.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter()
         {
             @Override
@@ -213,6 +202,7 @@ public class GraphActivity extends AppCompatActivity {
         */
     }
 
+    //potential useful methods
     private static void writeCsvFile(String string) {
         DateFormat df = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z");
         String date = df.format(Calendar.getInstance().getTime());
@@ -233,7 +223,20 @@ public class GraphActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    private double getDateX() {
 
+        long totalMilliSeconds = System.currentTimeMillis();
+        long currentSecond = Long.parseLong((new SimpleDateFormat("s", Locale.US)).format(new Date(totalMilliSeconds)));
+        //System.out.println("Seconds: " + currentSecond);
+        long currentMinute = Long.parseLong((new SimpleDateFormat("m", Locale.US)).format(new Date(totalMilliSeconds)));
+        //System.out.println("Minutes: " + currentMinute);
+        long currentHour = Long.parseLong((new SimpleDateFormat("H", Locale.US)).format(new Date(totalMilliSeconds)));
+        //System.out.println("Hour:" + currentHour);
+        double myTime = currentSecond + currentMinute * 60 + currentHour * 60 * 60;
+        //System.out.println("Time: " + myTime);
+        return myTime;
+
+    }
     private  void readCsvFile(){
         BufferedReader br = null;
         StringBuilder content = new StringBuilder();

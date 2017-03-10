@@ -5,9 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * Created by ZYR on 2017/1/19.
+ * This class is a AlarmReceiver extends a BroadcastReceiver, used for exec the PostService
+ * (as a background service) every certain seconds, along with the method 'setclock();'in PostService
+ * The class is currently not useful since the PostService has been set as a foreground service
  */
-
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent){

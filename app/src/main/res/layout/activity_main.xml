@@ -78,13 +78,13 @@
                    android:id="@+id/start_polling_button"
                    android:layout_width="100dp"
                    android:layout_height="wrap_content"
-                   android:text="@string/check_button"/>
+                   android:text="Test"/>
                <Button
                    android:id="@+id/stop_polling_button"
                    android:layout_width="100dp"
                    android:layout_height="wrap_content"
                    android:layout_marginStart="5dp"
-                   android:text="@string/stop_button"/>
+                   android:text="Test"/>
            </LinearLayout>
        </RelativeLayout>
     </LinearLayout>

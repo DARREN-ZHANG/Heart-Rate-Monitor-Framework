@@ -24,7 +24,9 @@ import java.net.URL;
 
 
 /**
- * This class is used to realize http get/post request, Json file parsing and anything related to network process
+ * This class is used to realize http get/post request, Json data parsing and anything related to network process
+ * Used in other Activities and Services:
+ * mNetwork = new NetworkUtility();
  */
 
 public class NetworkUtility {
@@ -70,7 +72,7 @@ public class NetworkUtility {
             }
         }).start();
     }
-    // The method is used to post abnormal data
+    // The method is used for posting abnormal data immediately
     public void sendPostHttpRequest(final String address,final String time, final float value,final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
@@ -130,7 +132,6 @@ public class NetworkUtility {
             }
         }).start();
     }
-
 
     public void sendLoginRequest(final String username, final String password, final HttpCallbackListener listener){
         new Thread(new Runnable() {
@@ -245,6 +246,7 @@ public class NetworkUtility {
         }).start();
     }
 
+    //This method is used for Uploading all data in a table(the data will be wrapped into a JsonObject first)
     public void postWholeTable(final String address, final JSONObject jsonObject, final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
@@ -298,6 +300,7 @@ public class NetworkUtility {
         }).start();
     }
 
+    //This method is used for send a query request to the server
     public void queryFromServer(final String address, final String startTime, final String endTime, final HttpCallbackListener listener){
         new Thread(new Runnable() {
             @Override
@@ -359,7 +362,7 @@ public class NetworkUtility {
         }).start();
     }
 
-
+    //Another way to parse Json Data
     public void parseJsonwithGson(String jsonData){
         /*
         Gson gson = new Gson();
@@ -371,8 +374,4 @@ public class NetworkUtility {
             System.out.println(userInfo.getTime());
         }*/
     }
-
-
-
-
 }

@@ -71,13 +71,13 @@ public class MainActivity extends AppCompatActivity {
         //layout init
         Button mDrawButton;
         Button mApplyButton;
-        Button mStartPollingButton;
-        Button mStopPollingButton;
+        //Button mStartPollingButton;
+        //Button mStopPollingButton;
 
         mDrawButton = (Button) findViewById(R.id.draw_button);
         mApplyButton = (Button) findViewById(R.id.apply_button);
-        mStartPollingButton = (Button) findViewById(R.id.start_polling_button);
-        mStopPollingButton = (Button) findViewById(R.id.stop_polling_button);
+        //mStartPollingButton = (Button) findViewById(R.id.start_polling_button);
+        //mStopPollingButton = (Button) findViewById(R.id.stop_polling_button);
 
         showData = (TextView) findViewById(R.id.data_tv);
         thresholdText = (EditText) findViewById(R.id.threshold_EditText);
@@ -135,20 +135,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mStartPollingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-        mStopPollingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
     }
 
     @Override
@@ -185,7 +171,14 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
 
-    //Stop the PostService manually
+    private void getPostService(){
+        final String url_data = readData();
+        Intent startIntent = new Intent(MainActivity.this, PostService.class);
+        startIntent.putExtra("URL_user_to_service", url_data);
+        System.out.println("url_user is : " + url_user);
+        startService(startIntent);
+    }
+    //Stop the PostService manually, not used for now,could be used in a test
     private void stopPostService(){
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent i = new Intent(MainActivity.this, AlarmReceiver.class);
@@ -194,14 +187,6 @@ public class MainActivity extends AppCompatActivity {
             alarmManager.cancel(pi);
         }
         stopService(new Intent(MainActivity.this, PostService.class));
-    }
-
-    private void getPostService(){
-        final String url_data = readData();
-        Intent startIntent = new Intent(MainActivity.this, PostService.class);
-        startIntent.putExtra("URL_user_to_service", url_data);
-        System.out.println("url_user is : " + url_user);
-        startService(startIntent);
     }
 }
 

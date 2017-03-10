@@ -93,6 +93,7 @@ public class ShowDBDataActivity extends AppCompatActivity {
         Button mqueryViaValueButton = (Button)findViewById(R.id.query_via_value);
         Button msetClockButton = (Button)findViewById(R.id.alarm_set_button);
 
+        //Ohter vars init
         String username = readData();
         url_user = "http://104.236.126.112/api/user/" + username;
         url_user_temp = url_user + "/temp";
@@ -141,7 +142,6 @@ public class ShowDBDataActivity extends AppCompatActivity {
                    @Override
                    public void onFinish(String response, Message message) {
                        queryFromServerHandler.sendMessage(message);
-
                    }
 
                    @Override
@@ -163,14 +163,18 @@ public class ShowDBDataActivity extends AppCompatActivity {
                         initiateUploadService();
                     }
                     else if(isMobile()){
-                        System.out.println("Mobile Data Connected.");
-                        ifUseMobileToUpload(myDB);
+                        //System.out.println("Mobile Data Connected.");
+
                         //Ask user if he/she want to use data to upload
+                        ifUseMobileToUpload(myDB);
+
                     }
                 }else {
                     //setNetwork
                     setNetwork();
                 }
+                mService.setCount(0);
+                //mService.clearJsonArray();
             }
         });
 
@@ -185,6 +189,10 @@ public class ShowDBDataActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     *The method is used for getting total number of the records in a table, with certain condition satisfied
+     * specifically, 'time >= ? AND time <=' here
+     */
     private int getTotalNumOfDataViaDate(String TableName, MyDatabaseHelper dbHelper, String startTime, String endTime){
         int TotalDataNum = -1;
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -210,7 +218,10 @@ public class ShowDBDataActivity extends AppCompatActivity {
         cursor.close();
         return TotalDataNum;
     }
-
+    /**
+     *The method is used for getting total number of the records in a table, with certain condition satisfied
+     * specifically, 'value >= ? AND value <= ?' here
+     */
     private int getTotalNumOfDataViaValue(String TableName, MyDatabaseHelper dbHelper, String startValue, String endValue){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         int TotalNum = -1;
@@ -246,16 +257,18 @@ public class ShowDBDataActivity extends AppCompatActivity {
                     case SCROLL_STATE_IDLE://when scrolling stopped
                         int position = mLoadView.getLastVisiblePosition();
                         if(position == mDataList.size() - 1 && position != mTotalDataNum -1){
+                            //if current bottom is the last loaded data, load more
                             mStartIndex += mMaxCount;
                             LoadDataTask mLoadDataTask = new LoadDataTask();
                             mLoadDataTask.execute();
                         }else if(position == mDataList.size() - 1 && position == mTotalDataNum - 1){
+                            //if all the data in the adapter has been loaded
                             Toast.makeText(getApplicationContext(),"No more Data",Toast.LENGTH_SHORT).show();
                         }
                         break;
-                    case SCROLL_STATE_TOUCH_SCROLL://scrolling with finger
+                    case SCROLL_STATE_TOUCH_SCROLL://scrolling with finger, not needed in this case
                         break;
-                    case SCROLL_STATE_FLING://scrolling without finger
+                    case SCROLL_STATE_FLING://scrolling without finger, not needed in this case
 
                         break;
                 }
@@ -263,7 +276,7 @@ public class ShowDBDataActivity extends AppCompatActivity {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
+                //actions when user is scrolling the ListView, not needed in this case
             }
         });
     }
@@ -281,7 +294,11 @@ public class ShowDBDataActivity extends AppCompatActivity {
         Intent intent = new Intent(this, UploadService.class);
         startService(intent);
     }
-
+    /**
+     * This method is used for querying from server. After the server send back data,
+     * the method would be called to parse the Json data and save it one by one into a
+     *  local temp table(named 'serverData') within the database
+     */
     private void parseJsonAndSaveData(String jsonData, MyDatabaseHelper dpHelper){
         try {
             JSONArray jsonArray = new JSONArray(jsonData);
@@ -307,12 +324,15 @@ public class ShowDBDataActivity extends AppCompatActivity {
     }
 
     private void displayDataFromServer(){
-        mAdapter = null;
+        mAdapter = null;//set Adapter to null, so every time the method been called,the listview will refresh
         flag = queryFromServer;
         initListView();
         initData();
     }
 
+    /**
+     * Pop a AlertDialog to ask user if he/she wants to use mobile data to upload
+     */
     private void ifUseMobileToUpload(final MyDatabaseHelper dbHelper){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Do you want to use mobile data to upload ?");
@@ -335,6 +355,9 @@ public class ShowDBDataActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Pop a AlertDialog to ask user to setup the network(to open wifi in this method)
+     */
     private void setNetwork(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Please Set Your Network");
@@ -371,6 +394,9 @@ public class ShowDBDataActivity extends AppCompatActivity {
         return isConnected;
     }
 
+    /**
+     * To check if the phone is using a Wifi now
+     */
     private boolean isWiFi(){
         ConnectivityManager cm = (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
@@ -378,13 +404,18 @@ public class ShowDBDataActivity extends AppCompatActivity {
         return isWiFi;
     }
 
+    /**
+     * To check if the phone is using Mobile data now
+     */
     private boolean isMobile(){
         ConnectivityManager cm = (ConnectivityManager) this.getSystemService(this.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isMobile = activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE;
         return isMobile;
     }
-
+    /**
+     * To read from sharedPreferences file , specifically, to get the username
+     */
     private String readData(){
         SharedPreferences pref = getSharedPreferences("UserName", MODE_PRIVATE);
         return pref.getString("username","");
@@ -399,7 +430,10 @@ public class ShowDBDataActivity extends AppCompatActivity {
                 + "value real)";
         db.execSQL(CREATE_TABLE);
     }
-
+    /**
+     * The LoadDataTask extends a AsyncTask, it opens a background Thread for the ListView to dynamically
+     * load data from a table in the Database
+     */
     class LoadDataTask extends AsyncTask<Void, Void, List<String>> {
         private MyDatabaseHelper dbHelper = new MyDatabaseHelper(ShowDBDataActivity.this, DBname, null, 1);
 
@@ -410,6 +444,7 @@ public class ShowDBDataActivity extends AppCompatActivity {
 
         @Override
         protected List<String> doInBackground(Void... params){
+            //use a flag to ID three different types of loading actions
             switch (flag){
                 case queryFromTime:
                     mMoreData = loadMoreViaDate(dbHelper, "userData", mStartIndex, mMaxCount);
